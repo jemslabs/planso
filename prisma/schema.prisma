@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  email         String         @unique
+  password      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  organizations Organization[]
+  joinedOrgs    Member[]
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  members     Member[]
+  posts       Post[]
+}
+
+model Member {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  role           Role         @default(MEMBER)
+  access         Boolean
+  joinedAt       DateTime     @default(now())
+  posts          Post[]
+
+  @@unique([userId, organizationId])
+}
+
+model Post {
+  id             Int          @id @default(autoincrement())
+  title          String
+  description    String
+  platforms      Platform[]
+  status         PostStatus   @default(DRAFT)
+  memberId       Int
+  member         Member       @relation(fields: [memberId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+enum Platform {
+  LINKEDIN
+  X
+  THREADS
+  INSTAGRAM
+  YOUTUBE
+}
+
+enum PostStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  SCHEDULED
+  POSTED
+  REJECTED
+}
