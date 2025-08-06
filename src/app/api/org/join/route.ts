@@ -6,6 +6,7 @@ export async function POST(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orgId = searchParams.get("id");
+    const code = searchParams.get("inviteCode");
     const userId = await getToken();
     if (!userId) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 400 });
@@ -15,6 +16,16 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { msg: "Organization Id not provided" },
         { status: 400 }
+      );
+    }
+    if (!code) {
+      return NextResponse.json(
+        {
+          msg: "No invite code provided",
+        },
+        {
+          status: 400,
+        }
       );
     }
     const org = await prisma.organization.findUnique({
@@ -30,6 +41,10 @@ export async function POST(req: Request) {
       );
     }
 
+    if (org.inviteCode !== code) {
+      return NextResponse.json({ msg: "Invalid invite code" }, { status: 400 });
+    }
+
     const alreadyMember = await prisma.member.findUnique({
       where: {
         userId_organizationId: {
@@ -40,26 +55,28 @@ export async function POST(req: Request) {
     });
 
     if (alreadyMember) {
-      return NextResponse.json( 
+      return NextResponse.json(
         { msg: "You are already a member of this organization" },
         { status: 400 }
       );
     }
 
     const member = await prisma.member.create({
-        data: {
-            userId,
-            organizationId: org.id,
-            role: "MEMBER",
-            access: false
-        }
-    })
-    if(!member){
-        return NextResponse.json({msg: "Failed to join this organization"}, {status: 400});
+      data: {
+        userId,
+        organizationId: org.id,
+        role: "MEMBER",
+        access: false,
+      },
+    });
+    if (!member) {
+      return NextResponse.json(
+        { msg: "Failed to join this organization" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({msg: `Joined ${org.name}`}, {status: 200});
-
+    return NextResponse.json({ msg: `Joined ${org.name}` }, { status: 200 });
   } catch {
     return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
   }

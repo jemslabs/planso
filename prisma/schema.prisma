@@ -26,6 +26,7 @@ model Organization {
   owner       User     @relation(fields: [ownerId], references: [id])
   members     Member[]
   posts       Post[]
+  inviteCode  String   @unique
 }
 
 model Member {

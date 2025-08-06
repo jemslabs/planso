@@ -28,12 +28,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
+    let uuid = crypto.randomUUID();
     const org = await prisma.organization.create({
       data: {
         name,
         description,
         ownerId: userId,
+        inviteCode: uuid.toString()
       },
     });
 
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
       },
     });
     return NextResponse.json(
-      { msg: "Organization created successfully"},
+      { msg: "Organization created successfully" },
       { status: 201 }
     );
   } catch {

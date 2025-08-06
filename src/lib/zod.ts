@@ -22,3 +22,7 @@ export const createOrgSchema = z.object({
   description: z.string().optional(),
   ownerId: z.number().gt(0, "Owner ID must be greater than 0"),
 });
+
+export const accessSchema = z.object({
+  memberId: z.number().gt(0, "Member ID must be greater than 0"),
+})
