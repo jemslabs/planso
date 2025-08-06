@@ -13,3 +13,12 @@ export const loginSchema = z.object({
   email: z.email(),
   password: z.string(),
 });
+
+export const createOrgSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Username is required")
+    .max(50, "Username must be less than 50 characters"),
+  description: z.string().optional(),
+  ownerId: z.number().gt(0, "Owner ID must be greater than 0"),
+});
