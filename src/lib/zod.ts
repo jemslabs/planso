@@ -39,3 +39,8 @@ export const addFeedbackSchema = z.object({
   postId: z.number(),
   feedback: z.string()
 })
+
+export const schedulePostSchema = z.object({
+  postId: z.number(),
+  date: z.date()
+})

@@ -47,6 +47,7 @@ model Member {
   @@unique([userId, organizationId])
 }
 
+
 model Post {
   id             Int          @id @default(autoincrement())
   title          String
@@ -60,11 +61,12 @@ model Post {
   feedbacks      Feedback[]
 
   approvedById  Int?
-  approvedBy    Member? @relation("PostApproved", fields: [approvedById], references: [id])
+  approvedBy    Member?   @relation("PostApproved", fields: [approvedById], references: [id])
   rejectedById  Int?
-  rejectedBy    Member? @relation("PostRejected", fields: [rejectedById], references: [id])
+  rejectedBy    Member?   @relation("PostRejected", fields: [rejectedById], references: [id])
   scheduledById Int?
-  scheduledBy   Member? @relation("PostScheduled", fields: [scheduledById], references: [id])
+  scheduledBy   Member?   @relation("PostScheduled", fields: [scheduledById], references: [id])
+  scheduledAt   DateTime?
 }
 
 model Feedback {
