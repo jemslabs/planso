@@ -39,6 +39,10 @@ model Member {
   access         Boolean
   joinedAt       DateTime     @default(now())
   posts          Post[]
+  feedbacks      Feedback[]
+  postsApproved  Post[]       @relation("PostApproved")
+  postsRejected  Post[]       @relation("PostRejected")
+  postsScheduled Post[]       @relation("PostScheduled")
 
   @@unique([userId, organizationId])
 }
@@ -46,13 +50,33 @@ model Member {
 model Post {
   id             Int          @id @default(autoincrement())
   title          String
-  description    String
+  description    String       @db.Text
   platforms      Platform[]
-  status         PostStatus   @default(DRAFT)
+  status         PostStatus   @default(PENDING)
   memberId       Int
   member         Member       @relation(fields: [memberId], references: [id])
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
+  feedbacks      Feedback[]
+
+  approvedById  Int?
+  approvedBy    Member? @relation("PostApproved", fields: [approvedById], references: [id])
+  rejectedById  Int?
+  rejectedBy    Member? @relation("PostRejected", fields: [rejectedById], references: [id])
+  scheduledById Int?
+  scheduledBy   Member? @relation("PostScheduled", fields: [scheduledById], references: [id])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id])
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  feedback  String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@unique([memberId, postId])
 }
 
 enum Role {
@@ -69,8 +93,7 @@ enum Platform {
 }
 
 enum PostStatus {
-  DRAFT
-  IN_REVIEW
+  PENDING
   APPROVED
   SCHEDULED
   POSTED

@@ -81,3 +81,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function GET(req: Request){
+  try {
+    const { searchParams } = new URL(req.url);
+    const orgId = searchParams.get("id");
+
+    if(!orgId){
+      return NextResponse.json({msg: "No organization id provided"}, {status: 404})
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: {
+        id: orgId
+      },
+      select: {
+        name: true,
+        description: true,
+        ownerId: true,
+        owner: true,
+        members: true
+      },
+    })
+    if(!org){
+      return NextResponse.json({msg: "No organization found"}, {status: 404})
+    }
+    return NextResponse.json(org, {status: 200});
+  } catch {
+    return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });   
+  }
+}
